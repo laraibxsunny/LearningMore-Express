@@ -73,4 +73,75 @@ describe("Testing /musicians Route", () => {
     //Assert
     expect(musician[0].id).not.toBe(1);
   });
+
+  describe("POST /musicians Error Array is returned when:", () => {
+    test("name field is empty", async () => {
+      //Arrange / Act
+      const response = await request(app)
+        .post("/musicians")
+        .send({ instrument: "The Triangle" });
+
+      //Assert
+      expect(response.status).toBe(400);
+      expect(response.body.error).toContainEqual({
+        type: "field",
+        msg: "Invalid value",
+        path: "name",
+        location: "body",
+      });
+    });
+
+    test("instrument field is empty", async () => {
+      //Arrange / Act
+      const response = await request(app)
+        .post("/musicians")
+        .send({ name: "Kendrick Lamar" });
+
+      //Assert
+      expect(response.status).toBe(400);
+      expect(response.body.error).toContainEqual({
+        type: "field",
+        msg: "Invalid value",
+        path: "instrument",
+        location: "body",
+      });
+    });
+
+    test("name field is not of length 2-20", async () => {
+      //Arrange / Act
+      const response = await request(app)
+        .post("/musicians")
+        .send({ name: "K", instrument: "Voice" });
+
+      //Assert
+      expect(response.status).toBe(400);
+      expect(response.body.error).toContainEqual({
+        type: "field",
+        msg: "Invalid value",
+        path: "name",
+        location: "body",
+        value: "K",
+      });
+    });
+
+    test("instrument field is not of length 2-20", async () => {
+      //Arrange / Act
+      const response = await request(app)
+        .post("/musicians")
+        .send({
+          name: "Kendrick Lamar",
+          instrument: "Bibbity Bobbity Boo, You smell like poo",
+        });
+
+      //Assert
+      expect(response.status).toBe(400);
+      expect(response.body.error).toContainEqual({
+        type: "field",
+        msg: "Invalid value",
+        path: "instrument",
+        location: "body",
+        value: "Bibbity Bobbity Boo, You smell like poo",
+      });
+    });
+  });
 });
